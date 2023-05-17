@@ -10,4 +10,5 @@
         "**/bower_components/**",
         "**/.history/**"
     ],
+    "emmet.includeLanguages": {"twig": "html"},
 }   
