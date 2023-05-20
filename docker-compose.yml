@@ -10,6 +10,9 @@ services:
       - MYSQL_PASSWORD=123456
       - MYSQL_DATABASE=movies
     volumes:
+      # folder of my database
       - ./var/db-data:/var/lib/mysql:rw
+      # configuration file
+      - ./my.cnf:/etc/mysql/my.cnf
     ports:
       - 3306:3306
