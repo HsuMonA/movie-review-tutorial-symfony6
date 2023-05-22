@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class MovieFormType extends AbstractType
 {
@@ -23,27 +24,33 @@ class MovieFormType extends AbstractType
                     'placeholder' => 'Enter title...'
                 ),
                 // make the title label invisible
-                'label' => false
+                'label' => false,
+                'required' => false
             ])
             ->add('releaseYear', IntegerType::class, [
                 'attr' => array(
                     'class' => 'bg-transparent block mt-10 border-b-2 w-full h-20 text-6xl outline-none',
                     'placeholder' => 'Enter Release Year...'
                 ),
-                'label' => false
+                'label' => false,
+                'required' => false
             ])
             ->add('description', TextareaType::class, [
                 'attr' => array(
                     'class' => 'bg-transparent block mt-10 border-b-2 w-full h-60 text-6xl outline-none',
                     'placeholder' => 'Enter Description...'
                 ),
-                'label' => false
+                'label' => false,
+                'required' => false
             ])
             ->add(
                 'imagePath', FileType::class,
                 array(
                     'required' => false,
-                    'mapped' => false
+                    'mapped' => false,
+                    'constraints' => [
+                        new NotBlank()
+                    ]
                 )
             )
             //->add('actors')
