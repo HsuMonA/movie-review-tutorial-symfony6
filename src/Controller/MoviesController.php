@@ -8,6 +8,7 @@ use App\Repository\MovieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -45,7 +46,9 @@ class MoviesController extends AbstractController
         $form = $this->createForm(MovieFormType::class, $movie);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Movie $newMovie */
             $newMovie = $form->getData();
+            /** @var UploadedFile $imagePath */
             $imagePath = $form->get('imagePath')->getData();
             if ($imagePath) {
                 $newFileName = uniqid() . '.' . $imagePath->guessExtension();
@@ -71,6 +74,41 @@ class MoviesController extends AbstractController
         ]);
     }
 
+    #[Route('/movies/edit/{id}', name: 'edit_movie')]
+    public function edit($id, Request $request): Response
+    {
+        $movie = $this->movieRepository->find($id);
+
+        $form = $this->createForm(MovieFormType::class, $movie);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $imagePath */
+            $imagePath = $form->get('imagePath')->getData();
+
+            if ($imagePath && $movie->getImagePath() !== null) {
+                $newFileName = uniqid() . '.' . $imagePath->guessExtension();
+                try {
+                    $imagePath->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads',
+                        $newFileName
+                    );
+                } catch (FileException $e) {
+                    return new Response($e->getMessage());
+                }
+                $movie->setImagePath('/uploads/' . $newFileName);
+            }
+
+            $this->em->flush();
+
+            return $this->redirectToRoute('movies');
+        }
+
+        return $this->render('movies/edit.html.twig', [
+            'movie' => $movie,
+            'form' => $form->createView()
+        ]);
+    }
 
     #[Route('/movies/{id}', methods: ['GET'], name: 'show_movie')]
     public function show($id): Response
